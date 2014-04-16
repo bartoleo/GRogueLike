@@ -1,0 +1,31 @@
+apply plugin: 'groovy'
+apply plugin: 'application'
+mainClassName='com.bartoleo.groguelike.main.Main'
+version = 1.1
+
+sourceCompatibility=1.7
+targetCompatibility=1.7
+
+repositories{
+    mavenCentral()
+}
+
+dependencies{
+    compile 'org.codehaus.groovy:groovy-all:2.1.1'
+    compile 'org.apache.commons:commons-lang3:3.1'
+    testCompile 'junit:junit:4.11'
+    compile files('lib/SquidLib.jar')
+}
+
+jar{
+    from files(sourceSets.main.output.classesDir)
+    from (configurations.runtime.asFileTree.files.collect{zipTree(it)}){
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA" 
+    }
+
+    manifest{
+        attributes 'Main-Class':'com.bartoleo.groguelike.main.Main'
+    }
+}
