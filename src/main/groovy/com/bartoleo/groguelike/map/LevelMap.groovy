@@ -71,6 +71,11 @@ class LevelMap {
         int worldLowY = viewY - RenderConfig.windowRadiusY
         int worldHighY = viewY + RenderConfig.windowRadiusY
 
+        if (worldLowY<0){
+            worldHighY = worldHighY-worldLowY
+            worldLowY = 0
+        }
+
         int xRange = worldHighX - worldLowX + 1 // this is the total size of the box
         int yRange = worldHighY - worldLowY + 1
 
