@@ -1,6 +1,7 @@
 package com.bartoleo.groguelike.main
 
 import com.bartoleo.groguelike.entity.Entity
+import com.bartoleo.groguelike.entity.Player
 import com.bartoleo.groguelike.game.Game
 import com.bartoleo.groguelike.game.GameState
 import com.bartoleo.groguelike.graphic.MessageLog
@@ -27,14 +28,14 @@ public class Main {
     public SwingPane display
     public JFrame frame
     public LevelMap levelMap
-    public Entity player
+    public Player player
 
     public int selectX = 0
     public int selectY = 0
 
 
     public static void main(String[] args) {
-        Main helloDungeon = new Main()
+        Main main = new Main()
     }
 
     public Main() {
@@ -47,11 +48,18 @@ public class Main {
         SColorFactory.addPallet("dark", SColorFactory.asGradient(RenderConfig.litNear, RenderConfig.litFarNight));
 
         // Generate map
-        //MapGenerator mapGen = new CityMapGenerator()
 
-        //levelMap = mapGen.reGenerate()
+        levelMap = new LevelMap(40,40)
+        levelMap.generate()
 
-        player = new Entity()
+        player = new Player()
+        player.hp = 20
+        player.hpMax = 20
+        player.ch = (char)'@'
+        player.x = 10
+        player.y = 10
+        player.color = SColor.YELLOW
+        levelMap.objects.add(player)
 
         // set up display
         frame = new JFrame("Groovy RogueLike")
@@ -97,9 +105,7 @@ public class Main {
         }
 
         //render stats
-        StatusBar.render(display, 0, (2 * RenderConfig.windowRadiusY) + 2, 10, 'hp', player?.fighter?.hp ?: 0, player?.fighter?.maxHP ?: 1, SColor.RED)
-        StatusBar.render(display, 12, (2 * RenderConfig.windowRadiusY) + 2, 10, 'sta', player?.fighter?.stamina ?: 0, player?.fighter?.maxStamina ?: 1, SColor.YELLOW)
-        StatusBar.render(display, 24, (2 * RenderConfig.windowRadiusY) + 2, 10, 'inf', player?.fighter?.infection ?: 0, player?.fighter?.maxInfection ?: 1, SColor.GREEN)
+        StatusBar.render(display, 0, (2 * RenderConfig.windowRadiusY) + 2, 10, 'hp', player.hp ?: 0, player.hpMax ?: 1, SColor.RED)
 
         MessageLog.render(display, player)
 
@@ -131,15 +137,10 @@ public class Main {
     }
 
     public void stepSim() {
-        //Run sim
-        levelMap.noiseMap.spread()
-        levelMap.noiseMap.fade()
-        levelMap.noiseMap.regenerateDirection()
 
         //This is not an efficient way to do this..
         levelMap.objects.toArray().each { Entity entity ->
-            if (entity.ai)
-                entity.ai.takeTurn()
+            entity.takeTurn()
         }
 
         levelMap.objects.sort({ it.priority })
@@ -150,17 +151,6 @@ public class Main {
 
     public void move(Direction dir, boolean shift = false) {
         if (Game.state == GameState.playing) {
-
-            if (shift && player.fighter.stamina) {
-                player.fighter.stamina--
-                int x = player.x + dir.deltaX
-                int y = player.y + dir.deltaY
-
-                //check for legality of move based solely on map boundary
-                if (x >= 0 && x < levelMap.xSize && y >= 0 && y < levelMap.ySize) {
-                    player.moveOrAttack(dir.deltaX, dir.deltaY)
-                }
-            }
 
             int x = player.x + dir.deltaX
             int y = player.y + dir.deltaY

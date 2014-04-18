@@ -10,5 +10,8 @@ public class Entity {
     public int y
     public char ch
     public def color
+    public void takeTurn(){
+        return
+    }
 
 }
